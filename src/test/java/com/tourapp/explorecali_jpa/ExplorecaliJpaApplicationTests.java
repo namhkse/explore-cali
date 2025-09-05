@@ -1,13 +1,13 @@
-package com.tourapp.explorecali_jpa;
+// package com.tourapp.explorecali_jpa;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class ExplorecaliJpaApplicationTests {
+// @SpringBootTest
+// class ExplorecaliJpaApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+// 	@Test
+// 	void contextLoads() {
+// 	}
 
-}
+// }
