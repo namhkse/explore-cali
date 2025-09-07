@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 
 
 @RestController
-@RequestMapping(path = "/tours/{tourId}/ratings")
+@RequestMapping(path = "/api/tours/{tourId}/ratings")
 public class TourRatingControler {
     private final TourRatingService tourRatingService;
    
@@ -73,5 +73,10 @@ public class TourRatingControler {
     @PatchMapping
     public RatingDto updateSome(@PathVariable(name = "tourId") int tourId, @RequestBody @Valid RatingDto ratingDto) {
         return new RatingDto(tourRatingService.updateSome(tourId, ratingDto.getCustomerId(), Optional.ofNullable(ratingDto.getScore()), Optional.ofNullable(ratingDto.getComment())));
+    }
+
+    @PostMapping("batch")
+    public RatingManyResponse createRatings(@PathVariable(name = "tourId") int tourId, @RequestBody @Valid RatingManyRequest ratings) {
+        return tourRatingService.rateMany(tourId, ratings.getRatings());
     }
 }

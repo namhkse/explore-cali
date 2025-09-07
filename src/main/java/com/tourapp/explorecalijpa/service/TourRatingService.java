@@ -6,13 +6,19 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tourapp.explorecalijpa.model.Tour;
 import com.tourapp.explorecalijpa.model.TourRating;
 import com.tourapp.explorecalijpa.repo.TourRatingRepository;
 import com.tourapp.explorecalijpa.repo.TourRepository;
+import com.tourapp.explorecalijpa.web.RatingDto;
+import com.tourapp.explorecalijpa.web.RatingManyResponse;
+
+import jakarta.validation.ConstraintViolationException;
 
 @Service
+@Transactional
 public class TourRatingService {
     private final TourRatingRepository tourRatingRepository;
     private final TourRepository tourRepository;
@@ -38,6 +44,7 @@ public class TourRatingService {
 
     /**
      * Get a page of tour ratings for a tour.
+     * 
      * @param tourId
      * @return
      */
@@ -73,6 +80,7 @@ public class TourRatingService {
 
     /**
      * Update some of the elements of a tour rating.
+     * 
      * @param tourId
      * @param customerId
      * @param score
@@ -88,6 +96,7 @@ public class TourRatingService {
 
     /**
      * Get a rating by id.
+     * 
      * @param id
      * @return
      */
@@ -97,6 +106,7 @@ public class TourRatingService {
 
     /**
      * Get all ratings.
+     * 
      * @return
      */
     public List<TourRating> lookupAll() {
@@ -105,6 +115,7 @@ public class TourRatingService {
 
     /**
      * Update all of the elements of a tour rating.
+     * 
      * @param tourId
      * @param customerId
      * @param score
@@ -120,6 +131,7 @@ public class TourRatingService {
 
     /**
      * Delete a rating.
+     * 
      * @param tourId
      * @param customerId
      */
@@ -130,6 +142,7 @@ public class TourRatingService {
 
     /**
      * Get the avg score of tour.
+     * 
      * @param tourId
      * @return
      */
@@ -137,5 +150,23 @@ public class TourRatingService {
         List<TourRating> ratings = tourRatingRepository.findByTourId(tourId);
         OptionalDouble avg = ratings.stream().mapToInt(r -> r.getScore()).average();
         return avg.isPresent() ? avg.getAsDouble() : 0;
+    }
+
+    public RatingManyResponse rateMany(int tourId, List<RatingDto> ratings) {
+        Tour tour = verifyTour(tourId);
+
+        for (RatingDto r : ratings) {
+            if (tourRatingRepository.findByTourIdAndCustomerId(tourId, r.getCustomerId()).isPresent()) {
+                throw new ConstraintViolationException("Unable to create duplicate ratings", null);
+            }
+            tourRatingRepository.save(new TourRating(tour, r.getCustomerId(), r.getScore()));
+        }
+
+        RatingManyResponse resp = new RatingManyResponse();
+        resp.setStatus("success");
+        resp.setCount(ratings.size());
+        resp.setRatings(ratings);
+
+        return resp;
     }
 }
